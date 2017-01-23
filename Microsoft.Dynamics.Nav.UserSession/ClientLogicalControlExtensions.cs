@@ -99,7 +99,7 @@ namespace Microsoft.Dynamics.Nav.UserSession
         {
             try
             {
-                return control.ContainedControls.First(c => c.Caption.Replace("&", "").EndsWith(controlCaption));
+                return control.ContainedControls.First(c => c.Caption.Replace("&", "").EndsWith(controlCaption) && (c.GetType() != typeof(ClientActionControl)));
             }
             catch (InvalidOperationException exception)
             {
