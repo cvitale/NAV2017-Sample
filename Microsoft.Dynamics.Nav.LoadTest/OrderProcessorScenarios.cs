@@ -22,6 +22,7 @@ namespace Microsoft.Dynamics.Nav.LoadTest
         private const int ItemListPageId = 31;
         private const int SalesOrderListPageId = 9305;
         private const int SalesOrderPageId = 42;
+        private const int ActivityCodePageId = 12124;
 
         private static UserContextManager orderProcessorUserContextManager;
 
@@ -160,6 +161,9 @@ namespace Microsoft.Dynamics.Nav.LoadTest
             // select a random customer
             var custno = TestScenario.SelectRandomRecordFromListPage(TestContext, CustomerListPageId, userContext, "No.");
 
+            // select a random activity code, mandatory for sales order posting
+            var actcode = TestScenario.SelectRandomRecordFromListPage(TestContext, ActivityCodePageId, userContext, "Code");
+
             // Invoke using the new sales order action on Role Center
             var newSalesOrderPage = userContext.EnsurePage(SalesOrderPageId, userContext.RoleCenterPage.Action("Sales Order").InvokeCatchForm());
 
@@ -167,15 +171,18 @@ namespace Microsoft.Dynamics.Nav.LoadTest
             newSalesOrderPage.Control("No.").Activate();
 
             // Navigate to Customer field in order to create record
-            newSalesOrderPage.Control("Customer").Activate();
+            newSalesOrderPage.Control("Customer No.").Activate();
 
             var newSalesOrderNo = newSalesOrderPage.Control("No.").StringValue;
             TestContext.WriteLine("Created Sales Order No. {0}", newSalesOrderNo);
 
             // Set Customer to a Random Customer and ignore any credit warning
-            TestScenario.SaveValueAndIgnoreWarning(TestContext, userContext, newSalesOrderPage.Control("Customer"), custno);
+            TestScenario.SaveValueAndIgnoreWarning(TestContext, userContext, newSalesOrderPage.Control("Customer No."), custno);
 
-            TestScenario.SaveValueWithDelay(newSalesOrderPage.Control("External Document No."), custno);
+            // Set Selected Activity Code
+            TestScenario.SaveValueAndIgnoreWarning(TestContext, userContext, newSalesOrderPage.Control("Activity Code"), actcode);
+
+            //TestScenario.SaveValueWithDelay(newSalesOrderPage.Control("External Document No."), custno);
 
             userContext.ValidateForm(newSalesOrderPage);
 
